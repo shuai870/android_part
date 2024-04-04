@@ -9,6 +9,7 @@ import com.baidu.location.LocationClient;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.common.BaiduMapSDKException;
+import com.baidu.trace.LBSTraceClient;
 
 public class DemoApplication extends Application {
 
@@ -16,6 +17,7 @@ public class DemoApplication extends Application {
     public void onCreate() {
         super.onCreate();
                 SDKInitializer.setAgreePrivacy(this, true);
+
         try {
              SDKInitializer.initialize(this);
         } catch (BaiduMapSDKException e) {

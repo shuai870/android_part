@@ -6,8 +6,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Vibrator;
+import android.view.View;
+import android.view.Window;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -18,34 +23,60 @@ import com.baidu.location.LocationClientOption;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
+import com.baidu.mapapi.map.MyLocationConfiguration;
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.model.LatLng;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
+import com.baidu.trace.Trace;
+import com.baidu.trace.LBSTraceClient;
+import com.baidu.trace.model.OnCustomAttributeListener;
+import com.baidu.trace.model.OnTraceListener;
+import com.baidu.trace.api.track.OnTrackListener;
+import com.baidu.trace.api.fence.OnFenceListener;
+import com.baidu.trace.api.entity.OnEntityListener;
+import com.baidu.trace.api.analysis.OnAnalysisListener;
+import com.baidu.trace.api.bos.OnBosListener;
+
 public class MainActivity extends AppCompatActivity {
     private MapView mMapView = null;
-    public LocationClient mLocationClient = null;
+    private LocationClient mLocationClient = null;
+    private LBSTraceClient mTraceClient = null;
     public BaiduMap mBaiduMap = null;
-
     private boolean is_first_locate =true;
     private static final int REQUEST_PERMISSION_RESULT = 99;
+
+    // 轨迹服务ID
+    long serviceId = 239155;
+    // 设备标识
+    String entityName = "myTrace";
+    // 是否需要对象存储服务，默认为：false，关闭对象存储服务。注：鹰眼 Android SDK v3.0以上版本支持随轨迹上传图像等对象数据，若需使用此功能，该参数需设为 true，且需导入bos-android-sdk-1.0.2.jar。
+    boolean isNeedObjectStorage = false;
+    // 初始化轨迹服务
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         LocationClient.setAgreePrivacy(true);
+        LBSTraceClient.setAgreePrivacy(getApplicationContext(),true);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main);
         mMapView =(MapView) findViewById(R.id.mMapView);
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setMyLocationEnabled(true);
+        // 初始化轨迹服务
+        Trace mTrace = new Trace(serviceId, entityName, isNeedObjectStorage);
         try {
             mLocationClient= new LocationClient(getApplicationContext());
+//            mTraceClient =new LBSTraceClient(MainActivity.this);
         } catch(Exception e) {
-
         }
         if(mLocationClient != null) {
             agreePermission();  //申请权限并进行定位  申请权限的代码里有定位方法requestLocation()
@@ -138,74 +169,74 @@ public class MainActivity extends AppCompatActivity {
 //需将配置好的LocationClientOption对象，通过setLocOption方法传递给LocationClient对象使用
         mLocationClient.setLocOption(locationOption);
     }
-    /**
-     * 动态申请权限
-     */
-    private void agreePermission(){
+        /**
+         * 动态申请权限
+         */
+        public void agreePermission(){
 
-        List<String> permissionList = new ArrayList<String>();
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+            List<String> permissionList = new ArrayList<String>();
+            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                permissionList.add(Manifest.permission.READ_EXTERNAL_STORAGE);
+            }
+            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
+                permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+            }
+            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CHANGE_WIFI_STATE)!= PackageManager.PERMISSION_GRANTED){
+                permissionList.add(Manifest.permission.CHANGE_WIFI_STATE);
+            }
+            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_WIFI_STATE)!= PackageManager.PERMISSION_GRANTED){
+                permissionList.add(Manifest.permission.ACCESS_WIFI_STATE);
+            }
+            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+                permissionList.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+            }
+            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
+                permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+            }
+            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.FOREGROUND_SERVICE)!= PackageManager.PERMISSION_GRANTED){
+                permissionList.add(Manifest.permission.FOREGROUND_SERVICE);
+            }
+            if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED){
+                permissionList.add(Manifest.permission.READ_PHONE_STATE);
+            }
+            if(!permissionList.isEmpty()){
+                String [] permissions = permissionList.toArray(new String[permissionList.size()]);
+                ActivityCompat.requestPermissions(MainActivity.this,permissions,REQUEST_PERMISSION_RESULT);
+            }else{
+                requestLocation();
+            }
         }
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        }
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CHANGE_WIFI_STATE)!= PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.CHANGE_WIFI_STATE);
-        }
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_WIFI_STATE)!= PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.ACCESS_WIFI_STATE);
-        }
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-        }
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)!= PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.FOREGROUND_SERVICE)!= PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.FOREGROUND_SERVICE);
-        }
-        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.READ_PHONE_STATE);
-        }
-        if(!permissionList.isEmpty()){
-            String [] permissions = permissionList.toArray(new String[permissionList.size()]);
-            ActivityCompat.requestPermissions(MainActivity.this,permissions,REQUEST_PERMISSION_RESULT);
-        }else{
-            requestLocation();
-        }
-    }
-    /**
-     *
-     *
-     * 动态申请权限之后，用户的界面出现弹窗，
-     * 无论是否点击同意，都会在这个方法中进行判断
-     * 逐一核对，
-     * 有一个不符就退出程序，
-     * 实际上比较流氓的做法，
-     * 正确的做法应该是，用到什么功能才进行申请而不是全申请了在运行
-     */
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode){
-            case REQUEST_PERMISSION_RESULT:
-                if(grantResults.length > 0){
-                    for(int result : grantResults){
-                        if(result != PackageManager.PERMISSION_GRANTED){
-                            Toast.makeText(this, "请同意权限使用本程序", Toast.LENGTH_SHORT).show();
-                            finish();
-                            return;
+        /**
+         *
+         *
+         * 动态申请权限之后，用户的界面出现弹窗，
+         * 无论是否点击同意，都会在这个方法中进行判断
+         * 逐一核对，
+         * 有一个不符就退出程序，
+         * 实际上比较流氓的做法，
+         * 正确的做法应该是，用到什么功能才进行申请而不是全申请了在运行
+         */
+        @Override
+        public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+            switch (requestCode){
+                case REQUEST_PERMISSION_RESULT:
+                    if(grantResults.length > 0){
+                        for(int result : grantResults){
+                            if(result != PackageManager.PERMISSION_GRANTED){
+                                Toast.makeText(this, "请同意权限使用本程序", Toast.LENGTH_SHORT).show();
+                                finish();
+                                return;
+                            }
                         }
+                        requestLocation();
+                    }else{
+                        Toast.makeText(this, "在申请权限回调时granResult.length错误", Toast.LENGTH_SHORT).show();
+                        finish();
                     }
-                    requestLocation();
-                }else{
-                    Toast.makeText(this, "在申请权限回调时granResult.length错误", Toast.LENGTH_SHORT).show();
-                    finish();
-                }
-            break;
+                    break;
+            }
         }
-    }
     @Override
     protected void onDestroy() {
         mLocationClient.stop();
