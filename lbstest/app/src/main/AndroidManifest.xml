@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-
     <!-- 访问网络，进行地图相关业务数据请求，包括地图数据，路线规划，POI检索等 -->
     <uses-permission android:name="android.permission.INTERNET" /> <!-- 获取网络状态，根据网络状态切换进行数据请求网络转换 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- 读取外置存储。如果开发者使用了so动态加载功能并且把so文件放在了外置存储区域，则需要申请该权限，否则不需要 -->
@@ -22,17 +21,19 @@
         android:fullBackupContent="@xml/backup_rules"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
-        android:label="安游天下"
+        android:label="client"
         android:supportsRtl="true"
         android:theme="@style/Theme.Lbstest"
         tools:targetApi="31">
+        <activity
+            android:name=".BossActivity"
+            android:exported="false" />
         <meta-data
             android:name="com.google.android.actions"
             android:resource="@xml/shape" />
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="cate6XrG9qk1M16Tz9uI7L2NclskpPOB" />
-
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -42,17 +43,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".MapActivity"
+            android:exported="true" />
 
         <service
             android:name="com.baidu.location.f"
             android:enabled="true"
-            android:process=":remote" />
-        <!-- 鹰眼定位的服务 -->
+            android:process=":remote" /> <!-- 鹰眼定位的服务 -->
         <service
             android:name="com.baidu.trace.LBSTraceService"
             android:enabled="true"
-            android:exported="true" >
-        </service>
+            android:exported="true" />
     </application>
 
 </manifest>

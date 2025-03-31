@@ -1,69 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="#FFC107"
     tools:context=".MainActivity">
-    <com.baidu.mapapi.map.MapView
-        android:id="@+id/mMapView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clickable="true"/>
-    <LinearLayout
-        android:layout_alignBottom="@+id/mMapView"
-        android:layout_centerHorizontal="true"
-        android:layout_width="match_parent"
-        android:layout_height="129px"
-        android:background="@xml/shape_10dp_corners"
-        android:orientation="horizontal">
-        <Button
-            android:id="@+id/number"
-            android:text="编号"
-            android:textColor="@color/white"
-            android:foreground="?attr/selectableItemBackground"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"/>
-        <Button
-            android:id="@+id/navigateTO"
-            android:text="路线"
-            android:textColor="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:background="@android:color/transparent"
-            android:foreground="?attr/selectableItemBackground"/>
-        <Button
-            android:id="@+id/warning"
-            android:text="告警"
-            android:textColor="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:foreground="?attr/selectableItemBackground"
-            android:background="@android:color/transparent"/>
-        <Button
-            android:id="@+id/path"
-            android:text="轨迹"
-            android:textColor="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:foreground="?attr/selectableItemBackground"
-            android:background="@android:color/transparent"
-            />
-        <Button
-            android:id="@+id/fence"
-            android:text="团队"
-            android:textColor="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:foreground="?attr/selectableItemBackground"
-            android:background="@android:color/transparent"
-            />
-    </LinearLayout>
 
-</RelativeLayout>
+    <Button
+        android:id="@+id/btn_elder_mode"
+        android:layout_width="337dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:background="#340FDC"
+        android:padding="12dp"
+        android:text="登录为老人模式"
+        android:textColor="@color/white"
+        android:textSize="38sp" />
+
+    <Button
+        android:id="@+id/btn_guardian_mode"
+        android:layout_width="337dp"
+        android:layout_height="wrap_content"
+        android:background="#48DA2E"
+        android:padding="12dp"
+        android:text="登录为监护者模式"
+        android:textColor="@color/white"
+        android:textSize="38sp" />
+
+
+    <EditText
+        android:id="@+id/name_input"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="22dp"
+        android:hint="输入用户名"
+        android:textSize="38sp"
+        android:gravity="center"
+        android:padding="10dp" />
+    <EditText
+        android:id="@+id/age_input"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:textSize="38sp"
+        android:hint="输入密码"
+        android:padding="10dp" />
+    <EditText
+        android:id="@+id/location_input"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:textSize="38sp"
+        android:hint="输入手机号"
+        android:padding="10dp" />
+
+    <EditText
+        android:id="@+id/location_inpuset"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:hint="输入绑定用户名"
+        android:padding="10dp"
+        android:textSize="38sp" />
+</LinearLayout>

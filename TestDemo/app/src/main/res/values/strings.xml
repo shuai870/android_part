@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">TestDemo</string>
+    <string-array name="activities_array">
+        <item>Walking</item>
+        <item>Running</item>
+        <item>Cycling</item>
+    </string-array>
+    <string-array name="positions_array">
+        <item>PantsPocket</item>
+        <item>ShirtPocket</item>
+        <item>Bag</item>
+    </string-array>
+</resources>

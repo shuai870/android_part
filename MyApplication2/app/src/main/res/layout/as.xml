@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:background="#FFC107">
+
+    <Button
+        android:id="@+id/btn_elder_mode"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/rounded_button_elder"
+        android:padding="12dp"
+        android:text="登录为老人模式"
+        android:textColor="@color/white"
+        android:textSize="38sp" />
+
+    <Button
+        android:id="@+id/btn_guardian_mode"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/rounded_button_elder"
+        android:padding="12dp"
+        android:text="登录为监护者模式"
+        android:textColor="@color/white"
+        android:textSize="38sp" />
+
+
+    <EditText
+        android:id="@+id/name_input"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:hint="输入用户名"
+        android:textSize="38sp"
+        android:gravity="center"
+        android:padding="10dp" />
+    <EditText
+        android:id="@+id/age_input"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:textSize="38sp"
+        android:hint="输入密码"
+        android:padding="10dp" />
+    <EditText
+        android:id="@+id/location_input"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:textSize="38sp"
+        android:hint="输入手机号"
+        android:padding="10dp" />
+
+    <EditText
+        android:id="@+id/location_inpuset"
+        android:layout_width="312dp"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        android:gravity="center"
+        android:hint="输入绑定用户名"
+        android:padding="10dp"
+        android:textSize="38sp" />
+</LinearLayout>

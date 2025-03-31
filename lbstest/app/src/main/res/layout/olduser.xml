@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 背景图片 -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/background_image"
+        android:scaleType="centerCrop"
+        android:contentDescription="Background Image" />
+
+    <!-- 半透明遮罩层，降低背景亮度 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:layout_gravity="center"/>
+
+    <!-- 菜单内容 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp">
+        <Button
+            android:id="@+id/btnLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_button_transparent"
+            android:elevation="4dp"
+            android:padding="16dp"
+            android:text="我的位置"
+            android:textColor="#FFFFFF"
+            android:textSize="38sp" />
+
+        <!-- 同步围栏按钮 -->
+        <Button
+            android:id="@+id/btnGeofenceSync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_button_transparent"
+            android:elevation="4dp"
+            android:padding="16dp"
+            android:text="同步围栏"
+            android:textColor="#FFFFFF"
+            android:textSize="38sp" />
+
+        <!-- 我的轨迹按钮 -->
+        <Button
+            android:id="@+id/btnMyTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_button_transparent"
+            android:elevation="4dp"
+            android:padding="16dp"
+            android:text="我的轨迹"
+            android:textColor="#FFFFFF"
+            android:textSize="38sp" />
+    </LinearLayout>
+    <!-- 圆形“我的”按钮，放置在最底部 -->
+</FrameLayout>

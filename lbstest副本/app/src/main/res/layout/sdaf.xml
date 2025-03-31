@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 背景图片 -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/background_image"
+        android:scaleType="centerCrop"
+        android:contentDescription="Background Image" />
+
+    <!-- 半透明遮罩层，降低背景亮度 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000"
+        android:layout_gravity="center"/>
+
+    <!-- 菜单内容 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- 标题 -->
+        <!--    <TextView-->
+        <!--        android:id="@+id/title"-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:text="主菜单"-->
+        <!--        android:textSize="24sp"-->
+        <!--        android:textColor="#FFFFFF"-->
+        <!--        android:layout_gravity="center_horizontal"-->
+        <!--        android:layout_marginBottom="32dp" />-->
+
+        <!-- 我的位置按钮 -->
+        <Button
+            android:id="@+id/btnLocation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_button_transparent"
+            android:elevation="4dp"
+            android:padding="16dp"
+            android:text="我的位置"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+        <!-- 同步围栏按钮 -->
+        <Button
+            android:id="@+id/btnGeofenceSync"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_button_transparent"
+            android:elevation="4dp"
+            android:padding="16dp"
+            android:text="同步围栏"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+        <!-- 我的轨迹按钮 -->
+        <Button
+            android:id="@+id/btnMyTrack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:background="@drawable/gradient_button_transparent"
+            android:elevation="4dp"
+            android:padding="16dp"
+            android:text="我的轨迹"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+        <!-- 帮助他人按钮 -->
+        <Button
+            android:id="@+id/btnHelpOthers"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/gradient_button_transparent"
+            android:elevation="4dp"
+            android:padding="16dp"
+            android:text="帮助他人"
+            android:textColor="#FFFFFF"
+            android:textSize="18sp" />
+
+    </LinearLayout>
+
+    <!-- 圆形“我的”按钮，放置在最底部 -->
+    <Button
+        android:id="@+id/btnMine"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_marginBottom="32dp"
+        android:background="@drawable/circular_button_background"
+        android:backgroundTint="@color/teal_200"
+        android:backgroundTintMode="src_over"
+        android:elevation="4dp"
+        android:text="返回"
+        android:textColor="#FFFFFF"
+        android:textSize="18sp" />
+
+    </FrameLayout>
