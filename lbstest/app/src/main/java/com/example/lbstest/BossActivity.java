@@ -7,6 +7,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -23,15 +24,32 @@ import com.baidu.mapapi.map.PolygonOptions;
 import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.model.LatLng;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import android.os.Handler;
 import com.baidu.trace.LBSTraceClient;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 public class BossActivity extends AppCompatActivity {
     private MapView mMapView = null;
     private LocationClient mLocationClient = null;
     public BaiduMap mBaiduMaps = null;
+    private boolean isListening = false;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +60,7 @@ public class BossActivity extends AppCompatActivity {
         mBaiduMaps = mMapView.getMap();
         mBaiduMaps.setMyLocationEnabled(true);
         Button showDialogButton = findViewById(R.id.show_dialog_buttons);
+        Button numbers = findViewById(R.id.numbers);
 
 
 
@@ -49,16 +68,28 @@ public class BossActivity extends AppCompatActivity {
         BaiduMap.OnMapClickListener listener = new BaiduMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
-                List<LatLng> point_click = new ArrayList<>();
-                point_click.add(latLng);
-                Log.d("mappoi",point_click.toString());
+                BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.img);
+                OverlayOptions option = new MarkerOptions().position(latLng).icon(bitmap);
+                mBaiduMaps.addOverlay(option);
+                set_rs(latLng);
             }
             @Override
             public void onMapPoiClick(MapPoi mapPoi) {
                 Log.d("mapPoi","点击了坐标");
             }
         };
-        mBaiduMaps.setOnMapClickListener(listener);
+
+        numbers.setOnClickListener(v -> {
+            if (isListening) {
+                mBaiduMaps.setOnMapClickListener(null); // 取消监听
+                isListening = false;
+                Log.d("MapClickListener", "已关闭监听");
+            } else {
+                mBaiduMaps.setOnMapClickListener(listener); // 开启监听
+                isListening = true;
+                Log.d("MapClickListener", "已开启监听");
+            }
+        });
 
         showDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -107,7 +138,41 @@ public class BossActivity extends AppCompatActivity {
         // 显示弹窗
         builder.show();
     }
-
+    private void set_rs(LatLng latLng) {
+        // 创建一个自定义布局的 AlertDialog
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_layout_set, null);
+        Button button_send = dialogView.findViewById(R.id.send_set);
+        // 获取布局中的控件
+        EditText editText_set = dialogView.findViewById(R.id.set_rs_number);
+        button_send.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String inputText = editText_set.getText().toString().trim(); // 获取输入内容，去除前后空格
+                if (!inputText.isEmpty()) { // 防止空输入导致崩溃
+                    int number = Integer.parseInt(inputText); // 转换为整数
+                    Log.d("UserInput", "输入的数值: " + number);
+                    showCircleFence(latLng,number);
+                    sendDataToServer(latLng,number);
+                } else {
+                    Log.d("UserInput", "输入为空");
+                }
+            }
+        });
+        // 创建弹窗
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("创建具体的界面大小");
+        builder.setView(dialogView);
+        // 设置关闭按钮
+        builder.setPositiveButton("关闭", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+                mBaiduMaps.clear();
+            }
+        });
+        // 显示弹窗
+        builder.show();
+    }
     // 创建一个绘制折线的方法
     private void drawSimplePolyline() {
         // 定义一组折线的坐标点
@@ -155,11 +220,8 @@ public class BossActivity extends AppCompatActivity {
     private void showOutOfBoundsAlert() {
         Toast.makeText(this, "对方已越界，定位已开启", Toast.LENGTH_SHORT).show();
     }
-    private void showCircleFence() {
-        BaiduMap mBaiduMap = mMapView.getMap();
-        // 定义圆形围栏的中心和半径
-        LatLng center = new LatLng(34.155721, 108.905559); // 北京
-        int radius = 300; // 半径为500米
+    private void showCircleFence(LatLng center,int radius) {
+        mBaiduMaps.clear();
         // 创建圆形区域
         CircleOptions circleOptions = new CircleOptions()
                 .center(center)
@@ -167,26 +229,10 @@ public class BossActivity extends AppCompatActivity {
                 .fillColor(0x5500FF00) // 填充颜色
                 .stroke(new Stroke(5, 0x5500FF00)); // 边框颜色和宽度
         // 添加到地图
-        mBaiduMap.addOverlay(circleOptions);
-    }
-    private void showRectangleFence() {
-        BaiduMap mBaiduMap = mMapView.getMap();
-        // 定义矩形围栏的四个角点
-        LatLng point1 = new LatLng(34.155721, 108.905559); // 左上角
-        LatLng point2 = new LatLng(34.155721, 108.907153); // 右上角
-        LatLng point3 = new LatLng(34.155389, 108.907153); // 右下角
-        LatLng point4 = new LatLng(34.155389, 108.905559); // 左下角
-        // 创建矩形区域
-        List<LatLng> points = Arrays.asList(point1, point2, point3, point4);
-        PolygonOptions polygonOptions = new PolygonOptions()
-                .points(points)
-                .fillColor(0x55FF0000) // 填充颜色
-                .stroke(new Stroke(5, 0x5500FF00)); // 边框颜色和宽度
-        // 添加到地图
-        mBaiduMap.addOverlay(polygonOptions);
+        mBaiduMaps.addOverlay(circleOptions);
     }
     private void showPolygonFence() {
-        BaiduMap mBaiduMap = mMapView.getMap();
+        mBaiduMaps.clear();
         // 定义多边形围栏的多个顶点
         LatLng point1 = new LatLng(34.156841, 108.905123);
         LatLng point2 = new LatLng(34.156692, 108.906848);
@@ -200,8 +246,57 @@ public class BossActivity extends AppCompatActivity {
                 .fillColor(0x5500FF00) // 填充颜色
                 .stroke(new Stroke(5, 0x5500FF00)); // 边框颜色和宽度
         // 添加到地图
-        mBaiduMap.addOverlay(polygonOptions);
+        mBaiduMaps.addOverlay(polygonOptions);
     }
+    private void sendDataToServer(LatLng latLng, int number) {
+        // 服务器 URL
+        String url = "https://your-server.com/api/upload";
+
+        // 构造 JSON 数据
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("lat", latLng.latitude);
+            jsonObject.put("lng", latLng.longitude);
+            jsonObject.put("radius", number);
+        } catch (JSONException e) {
+            Log.e("JSONError", "JSON 生成错误", e);
+            return;
+        }
+
+        // 创建请求体 (JSON)
+        RequestBody requestBody = RequestBody.create(
+                jsonObject.toString(),
+                MediaType.parse("application/json; charset=utf-8")
+        );
+
+        // 构建 HTTP 请求
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+
+        // 异步发送请求
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("ServerError", "请求失败", e);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    Log.d("ServerResponse", "成功: " + response.body().string());
+                } else {
+                    Log.e("ServerResponse", "失败: " + response.code());
+                }
+            }
+        });
+    }
+
+
+
+
+
     @Override
     protected void onDestroy() {
         mBaiduMaps.setMyLocationEnabled(false);

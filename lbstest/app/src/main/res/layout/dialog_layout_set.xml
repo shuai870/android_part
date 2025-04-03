@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+    <Button
+        android:id="@+id/send_set"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="发送设置数据"/>
+    <EditText
+        android:id="@+id/set_rs_number"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="此处圆形半径"
+        android:inputType="text"
+        android:padding="10dp"/>
+</LinearLayout>
