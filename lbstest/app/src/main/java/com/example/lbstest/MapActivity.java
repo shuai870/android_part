@@ -18,47 +18,32 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
-import com.baidu.mapapi.CoordType;
-import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
-import com.baidu.mapapi.map.CircleOptions;
+
 import com.baidu.mapapi.map.MapStatusUpdate;
 import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
-import com.baidu.mapapi.map.MyLocationConfiguration;
+
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
-import com.baidu.mapapi.map.PolygonOptions;
 import com.baidu.mapapi.map.PolylineOptions;
-import com.baidu.mapapi.map.Stroke;
+
 import com.baidu.mapapi.model.LatLng;
 
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
+
 import java.util.ArrayList;
-import java.util.Arrays;
+
 import java.util.List;
 
-
-import com.baidu.trace.Trace;
 import com.baidu.trace.LBSTraceClient;
-import com.baidu.trace.model.OnCustomAttributeListener;
-import com.baidu.trace.model.OnTraceListener;
-import com.baidu.trace.api.track.OnTrackListener;
-import com.baidu.trace.api.fence.OnFenceListener;
-import com.baidu.trace.api.entity.OnEntityListener;
-import com.baidu.trace.api.analysis.OnAnalysisListener;
-import com.baidu.trace.api.bos.OnBosListener;
+
 
 public class MapActivity extends AppCompatActivity{
     public MapView mMapView = null;
@@ -76,7 +61,6 @@ public class MapActivity extends AppCompatActivity{
         mMapView =(MapView) findViewById(R.id.mMapView);
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setMyLocationEnabled(true);
-        dynamicJsonParser = new DynamicJsonParser(mBaiduMap);
         try {
             mLocationClient= new LocationClient(getApplicationContext());
         } catch(Exception e) {
@@ -84,7 +68,11 @@ public class MapActivity extends AppCompatActivity{
         if(mLocationClient != null) {
             agreePermission();  //申请权限并进行定位  申请权限的代码里有定位方法requestLocation()
         }
-
+        dynamicJsonParser = new DynamicJsonParser(this,mBaiduMap);
+        try {
+            dynamicJsonParser.initTextToSpeech(getApplicationContext());
+        } catch(Exception e) {
+        }
         //        drawSimplePolyline();
         Button navigateTO = findViewById(R.id.navigateTO);
         navigateTO.setOnClickListener(new View.OnClickListener() {
@@ -297,6 +285,7 @@ public class MapActivity extends AppCompatActivity{
         mBaiduMap.setMyLocationEnabled(false);
         mMapView.onDestroy();
         mMapView = null;
+        dynamicJsonParser.releaseTextToSpeech();
         super.onDestroy();
     }
     @Override

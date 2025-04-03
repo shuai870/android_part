@@ -1,64 +1,33 @@
 package com.example.lbstest;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
-import android.Manifest;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Vibrator;
+import android.os.Looper;
+import android.util.Log;
 import android.view.View;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.baidu.location.BDAbstractLocationListener;
-import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
-import com.baidu.location.LocationClientOption;
-import com.baidu.mapapi.CoordType;
-import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.CircleOptions;
-import com.baidu.mapapi.map.MapStatusUpdate;
-import com.baidu.mapapi.map.MapStatusUpdateFactory;
+import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
-import com.baidu.mapapi.map.MyLocationConfiguration;
-import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.PolygonOptions;
 import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.model.LatLng;
-
-import java.io.BufferedWriter;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-
-import com.baidu.trace.Trace;
+import android.os.Handler;
 import com.baidu.trace.LBSTraceClient;
-import com.baidu.trace.model.OnCustomAttributeListener;
-import com.baidu.trace.model.OnTraceListener;
-import com.baidu.trace.api.track.OnTrackListener;
-import com.baidu.trace.api.fence.OnFenceListener;
-import com.baidu.trace.api.entity.OnEntityListener;
-import com.baidu.trace.api.analysis.OnAnalysisListener;
-import com.baidu.trace.api.bos.OnBosListener;
-
 public class BossActivity extends AppCompatActivity {
     private MapView mMapView = null;
     private LocationClient mLocationClient = null;
@@ -73,10 +42,33 @@ public class BossActivity extends AppCompatActivity {
         mBaiduMaps = mMapView.getMap();
         mBaiduMaps.setMyLocationEnabled(true);
         Button showDialogButton = findViewById(R.id.show_dialog_buttons);
+
+
+
+
+        BaiduMap.OnMapClickListener listener = new BaiduMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                List<LatLng> point_click = new ArrayList<>();
+                point_click.add(latLng);
+                Log.d("mappoi",point_click.toString());
+            }
+            @Override
+            public void onMapPoiClick(MapPoi mapPoi) {
+                Log.d("mapPoi","点击了坐标");
+            }
+        };
+        mBaiduMaps.setOnMapClickListener(listener);
+
         showDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showCoordinateDialog();
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        showCoordinateDialog();
+                    }
+                }, 3000); // 3秒延迟
             }
         });
 
@@ -115,6 +107,7 @@ public class BossActivity extends AppCompatActivity {
         // 显示弹窗
         builder.show();
     }
+
     // 创建一个绘制折线的方法
     private void drawSimplePolyline() {
         // 定义一组折线的坐标点

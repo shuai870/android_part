@@ -5,13 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".BossActivity">
-
     <com.baidu.mapapi.map.MapView
         android:id="@+id/mMapViews"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clickable="true" />
-
     <LinearLayout
         android:layout_alignBottom="@+id/mMapViews"
         android:layout_centerHorizontal="true"
@@ -20,56 +18,43 @@
         android:background="@xml/shape_10dp_corners"
         android:orientation="horizontal">
         <Button
-            android:id="@+id/show_dialog_buttons"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
             android:id="@+id/numbers"
-            android:text="信息"
+            android:text="C虚拟电子围栏"
             android:textColor="@color/white"
             android:foreground="?attr/selectableItemBackground"
-            android:layout_width="wrap_content"
+            android:layout_width="329px"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:background="@android:color/transparent"/>
         <Button
             android:id="@+id/navigateTOs"
-            android:text="路线"
+            android:text="E虚拟电子围栏"
             android:textColor="@color/white"
-            android:layout_width="wrap_content"
+            android:layout_width="329px"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:background="@android:color/transparent"
             android:foreground="?attr/selectableItemBackground"/>
         <Button
             android:id="@+id/warnings"
-            android:text="告警"
+            android:text="控制时长"
             android:textColor="@color/white"
-            android:layout_width="wrap_content"
+            android:layout_width="177px"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:foreground="?attr/selectableItemBackground"
             android:background="@android:color/transparent"/>
         <Button
-            android:id="@+id/paths"
+            android:id="@+id/track"
             android:text="轨迹"
             android:textColor="@color/white"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
             android:foreground="?attr/selectableItemBackground"
-            android:background="@android:color/transparent"
-            />
+            android:layout_width="177px"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"/>
         <Button
-            android:id="@+id/fences"
-            android:text="走失"
-            android:textColor="#FFFFFF"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
+            android:id="@+id/show_dialog_buttons"
             android:foreground="?attr/selectableItemBackground"
-            android:background="@android:color/transparent"
-            />
+            android:layout_width="77px"
+            android:layout_height="match_parent"
+            android:background="@android:color/transparent"/>
     </LinearLayout>
 
 </RelativeLayout>
