@@ -32,6 +32,7 @@ import java.util.List;
 import android.os.Handler;
 import com.baidu.trace.LBSTraceClient;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -48,7 +49,8 @@ public class BossActivity extends AppCompatActivity {
     private LocationClient mLocationClient = null;
     public BaiduMap mBaiduMaps = null;
     private boolean isListening = false;
-
+    private boolean isListeningE  = false;
+    List<LatLng> Edata = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +63,7 @@ public class BossActivity extends AppCompatActivity {
         mBaiduMaps.setMyLocationEnabled(true);
         Button showDialogButton = findViewById(R.id.show_dialog_buttons);
         Button numbers = findViewById(R.id.numbers);
-
-
-
-
+        Button navigateTOs = findViewById(R.id.navigates);
         BaiduMap.OnMapClickListener listener = new BaiduMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -78,7 +77,6 @@ public class BossActivity extends AppCompatActivity {
                 Log.d("mapPoi","点击了坐标");
             }
         };
-
         numbers.setOnClickListener(v -> {
             if (isListening) {
                 mBaiduMaps.setOnMapClickListener(null); // 取消监听
@@ -90,7 +88,31 @@ public class BossActivity extends AppCompatActivity {
                 Log.d("MapClickListener", "已开启监听");
             }
         });
-
+        BaiduMap.OnMapClickListener listenerE = new BaiduMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.drawable.img);
+                OverlayOptions option = new MarkerOptions().position(latLng).icon(bitmap);
+                mBaiduMaps.addOverlay(option);
+                Edata.add(latLng);
+            }
+            @Override
+            public void onMapPoiClick(MapPoi mapPoi) {
+                Log.d("mapPoi","点击了坐标");
+            }
+        };
+        navigateTOs.setOnClickListener(v ->{
+            if(isListeningE){
+                showPolygonFence(Edata);
+                sendDataServer(Edata);
+                Edata.clear();
+                mBaiduMaps.setOnMapClickListener(null);
+                isListeningE = false;
+            }else{
+                mBaiduMaps.setOnMapClickListener(listenerE);
+                isListeningE =true;
+            }
+        });
         showDialogButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -103,15 +125,6 @@ public class BossActivity extends AppCompatActivity {
             }
         });
 
-//        // 显示圆形围栏
-//        showCircleFence();
-
-//        // 显示矩形围栏
-//        showRectangleFence();
-//
-//        // 显示多边形围栏
-//        showPolygonFence();
-//        showOutOfBoundsAlert();
           drawSimplePolyline();
     }
     private void showCoordinateDialog() {
@@ -231,16 +244,8 @@ public class BossActivity extends AppCompatActivity {
         // 添加到地图
         mBaiduMaps.addOverlay(circleOptions);
     }
-    private void showPolygonFence() {
+    private void showPolygonFence(List<LatLng> points) {
         mBaiduMaps.clear();
-        // 定义多边形围栏的多个顶点
-        LatLng point1 = new LatLng(34.156841, 108.905123);
-        LatLng point2 = new LatLng(34.156692, 108.906848);
-        LatLng point3 = new LatLng(34.155475, 108.907297);
-        LatLng point4 = new LatLng(34.156053, 108.905828);
-        LatLng point5 = new LatLng(34.156602, 108.904935); // 添加一个额外的点来形成多边形
-        // 创建多边形区域
-        List<LatLng> points = Arrays.asList(point1, point2, point3, point4, point5);
         PolygonOptions polygonOptions = new PolygonOptions()
                 .points(points)
                 .fillColor(0x5500FF00) // 填充颜色
@@ -250,7 +255,7 @@ public class BossActivity extends AppCompatActivity {
     }
     private void sendDataToServer(LatLng latLng, int number) {
         // 服务器 URL
-        String url = "https://your-server.com/api/upload";
+        String url = "http://192.168.124.11:9090/getdata/insertdata";
 
         // 构造 JSON 数据
         JSONObject jsonObject = new JSONObject();
@@ -292,7 +297,52 @@ public class BossActivity extends AppCompatActivity {
             }
         });
     }
+    private void sendDataServer(List<LatLng> Edata){
+        // 服务器 URL
+        String url = "http://192.168.124.11:9090/getdata/insertlist";
 
+        // 构造 JSON 数据
+
+        JSONArray jsonArray = new JSONArray();
+        for (LatLng latLng : Edata) {
+            JSONObject jsonObjectlist = new JSONObject();
+            try {
+                jsonObjectlist.put("lat", latLng.latitude);
+                jsonObjectlist.put("lng", latLng.longitude);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            jsonArray.put(jsonObjectlist);
+        }
+
+        RequestBody requestBodylist = RequestBody.create(
+                jsonArray.toString(),
+                MediaType.parse("application/json; charset=utf-8")
+        );
+
+        // 构建 HTTP 请求
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url)
+                .post(requestBodylist)
+                .build();
+
+        // 异步发送请求
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e("ServerError", "请求失败", e);
+            }
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    Log.d("ServerResponse", "成功: " + response.body().string());
+                } else {
+                    Log.e("ServerResponse", "失败: " + response.code());
+                }
+            }
+        });
+    }
 
 
 
