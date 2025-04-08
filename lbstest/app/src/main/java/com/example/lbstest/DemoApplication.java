@@ -24,5 +24,6 @@ public class DemoApplication extends Application {
 
         }
              SDKInitializer.setCoordType(CoordType.BD09LL);
+
     }
 }

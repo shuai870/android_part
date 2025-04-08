@@ -2,6 +2,9 @@ package com.example.lbstest;
 import androidx.appcompat.app.AppCompatActivity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.media.AudioAttributes;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Looper;
 import android.util.Log;
@@ -25,7 +28,12 @@ import com.baidu.mapapi.map.PolylineOptions;
 import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.model.LatLng;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -51,7 +59,7 @@ public class BossActivity extends AppCompatActivity {
     private boolean isListening = false;
     private boolean isListeningE  = false;
     List<LatLng> Edata = new ArrayList<>();
-
+    private MediaPlayer mediaPlayer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -141,6 +149,9 @@ public class BossActivity extends AppCompatActivity {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("MAX告警，相关文件已下载");
         builder.setView(dialogView);
+        fetchAudioUrlAndPlay();
+
+
         // 设置关闭按钮
         builder.setPositiveButton("关闭", new DialogInterface.OnClickListener() {
             @Override
@@ -344,8 +355,65 @@ public class BossActivity extends AppCompatActivity {
         });
     }
 
+    private void fetchAudioUrlAndPlay() {
+        String requestUrl = "http://192.168.124.11:9090/upload/latest";  // 你服务端返回音频路径的接口
 
+        new Thread(() -> {
+            try {
+                URL url = new URL(requestUrl);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setConnectTimeout(5000);
 
+                InputStream inputStream = conn.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                StringBuilder result = new StringBuilder();
+                String line;
+
+                while ((line = reader.readLine()) != null) {
+                    result.append(line);
+                }
+
+                reader.close();
+                inputStream.close();
+
+                String audioUrl = new JSONObject(result.toString()).getString("url");
+
+                runOnUiThread(() -> playAudioFromUrl(audioUrl));
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                Log.e("AudioFetch", "获取音频 URL 失败：" + e.getMessage());
+            }
+        }).start();
+    }
+    private void playAudioFromUrl(String audioUrl) {
+        try {
+            if (mediaPlayer != null) {
+                mediaPlayer.release();
+            }
+
+            mediaPlayer = new MediaPlayer();
+
+            mediaPlayer.setAudioAttributes(
+                    new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_MEDIA)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build());
+            mediaPlayer.setDataSource(audioUrl);
+
+            mediaPlayer.setOnPreparedListener(MediaPlayer::start);
+            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                Log.e("AudioPlay", "播放出错 what=" + what + ", extra=" + extra);
+                Toast.makeText(getApplicationContext(), "音频播放失败", Toast.LENGTH_SHORT).show();
+                return true;
+            });
+            mediaPlayer.prepareAsync();
+            Log.d("AudioPlay", "准备播放: " + audioUrl);
+        } catch (IOException e) {
+            Log.e("AudioPlay", "IOException: " + e.getMessage());
+        }
+    }
 
     @Override
     protected void onDestroy() {

@@ -10,8 +10,17 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
@@ -41,6 +50,7 @@ import com.baidu.mapapi.model.LatLng;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.Locale;
 
 import com.baidu.trace.LBSTraceClient;
 
@@ -52,6 +62,9 @@ public class MapActivity extends AppCompatActivity{
     private boolean is_first_locate =true;
     private static final int REQUEST_PERMISSION_RESULT = 99;
     private DynamicJsonParser dynamicJsonParser;
+    private TextToSpeech tts;
+    private boolean ttsReady = false;
+    private boolean hasAlertedRecently = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -71,9 +84,48 @@ public class MapActivity extends AppCompatActivity{
         dynamicJsonParser = new DynamicJsonParser(this,mBaiduMap);
         try {
             dynamicJsonParser.initTextToSpeech(getApplicationContext());
+            // 1. 初始化 TTS，只执行一次
+            tts = new TextToSpeech(getApplicationContext(), status -> {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = tts.setLanguage(Locale.CHINESE);
+                    if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
+                        ttsReady = true;
+                    }
+                }
+            });
         } catch(Exception e) {
         }
         //        drawSimplePolyline();
+        /**
+         * 光线传感器获取
+         */
+        SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
+
+        SensorEventListener lightListener = new SensorEventListener() {
+            @Override
+            public void onSensorChanged(SensorEvent event) {
+                float lux = event.values[0];
+                Log.d("LIGHT_SENSOR", "当前光强: " + lux);
+                if (lux < 5 && ttsReady && !hasAlertedRecently) {
+                    speak("触发主动告警");
+                    AudioAlertRecorder.start(getApplicationContext());  // 开始录音
+                    hasAlertedRecently = true;
+                    // 5 秒内不再重复播报
+                    new Handler().postDelayed(() -> hasAlertedRecently = false, 5000);
+                }
+            }
+            @Override
+            public void onAccuracyChanged(Sensor sensor, int accuracy) {}
+        };
+
+        sensorManager.registerListener(lightListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
+
+
+
+        /**
+         * 同步地理围栏坐标
+         */
         Button navigateTO = findViewById(R.id.navigateTO);
         navigateTO.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -81,6 +133,8 @@ public class MapActivity extends AppCompatActivity{
                 dynamicJsonParser.fetchAndParseJson();
             }
         });
+
+
     }
     // 创建一个绘制折线的方法
     private void drawSimplePolyline() {
@@ -126,6 +180,7 @@ public class MapActivity extends AppCompatActivity{
                 .zIndex(9); // 设置图层级别，确保标记在折线之上
         mBaiduMap.addOverlay(options);
     }
+
     /**
      * 定位监听器
      * 定位完成则执行下面的功能
@@ -212,6 +267,14 @@ public class MapActivity extends AppCompatActivity{
 //需将配置好的LocationClientOption对象，通过setLocOption方法传递给LocationClient对象使用
         mLocationClient.setLocOption(locationOption);
     }
+
+
+    private void speak(String text) {
+        if (tts != null) {
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "MAX_ALERT");
+        }
+    }
+
     /**
      * 动态申请权限
      */
@@ -240,6 +303,9 @@ public class MapActivity extends AppCompatActivity{
         }
         if(ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.READ_PHONE_STATE)!= PackageManager.PERMISSION_GRANTED){
             permissionList.add(Manifest.permission.READ_PHONE_STATE);
+        }
+        if(ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.RECORD_AUDIO);
         }
         if(!permissionList.isEmpty()){
             String [] permissions = permissionList.toArray(new String[permissionList.size()]);
@@ -286,6 +352,10 @@ public class MapActivity extends AppCompatActivity{
         mMapView.onDestroy();
         mMapView = null;
         dynamicJsonParser.releaseTextToSpeech();
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
         super.onDestroy();
     }
     @Override
