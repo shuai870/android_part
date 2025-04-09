@@ -5,6 +5,11 @@
     android:layout_height="wrap_content"
     android:padding="16dp">
 
+    <Button
+        android:id="@+id/GetAudio"
+        android:text="获取紧急语音"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
     <!-- 显示坐标点信息 -->
     <TextView
         android:id="@+id/coordinate_info"

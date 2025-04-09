@@ -34,7 +34,8 @@ import com.baidu.geofence.PoiItem;
 
 public class DynamicJsonParser {
         private static final String TAG = "DynamicJsonParser";
-        private static final String URL = "http://192.168.124.11:9090/getdata";
+        private static  String URL;
+
         private final OkHttpClient client = new OkHttpClient();
 
         private BaiduMap mBaiduMap;
@@ -45,6 +46,10 @@ public class DynamicJsonParser {
         private TextToSpeech mTextToSpeech;
         private Vibrator mVibrator;
         private Handler mHandler = new Handler(Looper.getMainLooper());
+
+
+
+
         public DynamicJsonParser(Context context, BaiduMap baiduMap){
 
 
@@ -61,7 +66,7 @@ public class DynamicJsonParser {
             MediaType mediaType = MediaType.parse("text/plain");
 
             RequestBody requestBody = RequestBody.create(mediaType, "a");
-
+            URL =Constants.BASE_URL + "getdata";
             Request request = new Request.Builder().url(URL)
                     .post(requestBody)
                     .build();

@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.List;
 import android.os.Handler;
 import com.baidu.trace.LBSTraceClient;
+import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -60,6 +61,7 @@ public class BossActivity extends AppCompatActivity {
     private boolean isListeningE  = false;
     List<LatLng> Edata = new ArrayList<>();
     private MediaPlayer mediaPlayer;
+    private static  String PHOTO_URL;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +74,15 @@ public class BossActivity extends AppCompatActivity {
         Button showDialogButton = findViewById(R.id.show_dialog_buttons);
         Button numbers = findViewById(R.id.numbers);
         Button navigateTOs = findViewById(R.id.navigates);
+        Button aqqqqq = findViewById(R.id.aqqqqq);
+        PHOTO_URL = Constants.BASE_URL + "photo/latest";
+
+        aqqqqq.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showOutOfBoundsAlert();
+            }
+        });
         BaiduMap.OnMapClickListener listener = new BaiduMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -129,7 +140,7 @@ public class BossActivity extends AppCompatActivity {
                     public void run() {
                         showCoordinateDialog();
                     }
-                }, 3000); // 3秒延迟
+                }, 999);
             }
         });
 
@@ -139,19 +150,26 @@ public class BossActivity extends AppCompatActivity {
         // 创建一个自定义布局的 AlertDialog
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_layout, null);
         // 获取布局中的控件
+        Button audio_b  = dialogView.findViewById(R.id.GetAudio);
         TextView coordinateInfo = dialogView.findViewById(R.id.coordinate_info);
         ImageView imageView = dialogView.findViewById(R.id.image_view);
+        Glide.with(this)
+                .load(PHOTO_URL)
+                .into(imageView);
         // 设置坐标点信息
-        coordinateInfo.setText("纬度：39.963175\n经度：116.400244");
+        coordinateInfo.setText("纬度：34.163308\n经度：108.908002");
         // 设置图片（这里你可以使用自己需要的图片资源）
         imageView.setImageResource(R.drawable.sample_image);  // 替换为你的图片资源
+        audio_b.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                fetchAudioUrlAndPlay();
+            }
+        });
         // 创建弹窗
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("MAX告警，相关文件已下载");
+        builder.setTitle("用户触发告警");
         builder.setView(dialogView);
-        fetchAudioUrlAndPlay();
-
-
         // 设置关闭按钮
         builder.setPositiveButton("关闭", new DialogInterface.OnClickListener() {
             @Override
@@ -266,7 +284,7 @@ public class BossActivity extends AppCompatActivity {
     }
     private void sendDataToServer(LatLng latLng, int number) {
         // 服务器 URL
-        String url = "http://192.168.124.11:9090/getdata/insertdata";
+        String url = Constants.BASE_URL + "getdata/insertdata";
 
         // 构造 JSON 数据
         JSONObject jsonObject = new JSONObject();
@@ -310,7 +328,7 @@ public class BossActivity extends AppCompatActivity {
     }
     private void sendDataServer(List<LatLng> Edata){
         // 服务器 URL
-        String url = "http://192.168.124.11:9090/getdata/insertlist";
+        String url = Constants.BASE_URL + "getdata/insertlist";
 
         // 构造 JSON 数据
 
@@ -356,8 +374,7 @@ public class BossActivity extends AppCompatActivity {
     }
 
     private void fetchAudioUrlAndPlay() {
-        String requestUrl = "http://192.168.124.11:9090/upload/latest";  // 你服务端返回音频路径的接口
-
+        String requestUrl =Constants.BASE_URL + "upload/latest";
         new Thread(() -> {
             try {
                 URL url = new URL(requestUrl);
@@ -377,8 +394,7 @@ public class BossActivity extends AppCompatActivity {
                 reader.close();
                 inputStream.close();
 
-                String audioUrl = new JSONObject(result.toString()).getString("url");
-
+                String audioUrl = Constants.BASE_URL + new JSONObject(result.toString()).getString("url");
                 runOnUiThread(() -> playAudioFromUrl(audioUrl));
 
             } catch (Exception e) {

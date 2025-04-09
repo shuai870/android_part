@@ -78,9 +78,9 @@ public class AudioAlertRecorder {
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("audio", file.getName(), fileBody)
                 .build();
-
+        String url = Constants.BASE_URL + "upload/audio";
         Request request = new Request.Builder()
-                .url("http://192.168.124.11:9090/upload/audio") // 替换为实际上传接口
+                .url(url) // 替换为实际上传接口
                 .post(requestBody)
                 .build();
 

@@ -70,6 +70,9 @@ public class MapActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         LocationClient.setAgreePrivacy(true);
         LBSTraceClient.setAgreePrivacy(getApplicationContext(),true);
+        if(mLocationClient != null) {
+            agreePermission();  //申请权限并进行定位  申请权限的代码里有定位方法requestLocation()
+        }
         setContentView(R.layout.activity_map);
         mMapView =(MapView) findViewById(R.id.mMapView);
         mBaiduMap = mMapView.getMap();
@@ -78,10 +81,9 @@ public class MapActivity extends AppCompatActivity{
             mLocationClient= new LocationClient(getApplicationContext());
         } catch(Exception e) {
         }
-        if(mLocationClient != null) {
-            agreePermission();  //申请权限并进行定位  申请权限的代码里有定位方法requestLocation()
-        }
+
         dynamicJsonParser = new DynamicJsonParser(this,mBaiduMap);
+        PhotoUploader photoUploader = new PhotoUploader(getApplicationContext());
         try {
             dynamicJsonParser.initTextToSpeech(getApplicationContext());
             // 1. 初始化 TTS，只执行一次
@@ -95,13 +97,14 @@ public class MapActivity extends AppCompatActivity{
             });
         } catch(Exception e) {
         }
-        //        drawSimplePolyline();
+
+
+
         /**
          * 光线传感器获取
          */
         SensorManager sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         Sensor lightSensor = sensorManager.getDefaultSensor(Sensor.TYPE_LIGHT);
-
         SensorEventListener lightListener = new SensorEventListener() {
             @Override
             public void onSensorChanged(SensorEvent event) {
@@ -113,14 +116,13 @@ public class MapActivity extends AppCompatActivity{
                     hasAlertedRecently = true;
                     // 5 秒内不再重复播报
                     new Handler().postDelayed(() -> hasAlertedRecently = false, 5000);
+                    photoUploader.uploadLatestPhoto();
                 }
             }
             @Override
             public void onAccuracyChanged(Sensor sensor, int accuracy) {}
         };
-
         sensorManager.registerListener(lightListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-
 
 
         /**
@@ -134,6 +136,14 @@ public class MapActivity extends AppCompatActivity{
             }
         });
 
+
+        Button warning = findViewById(R.id.warning);
+        warning.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                drawSimplePolyline();
+            }
+        });
 
     }
     // 创建一个绘制折线的方法
@@ -307,6 +317,9 @@ public class MapActivity extends AppCompatActivity{
         if(ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
             permissionList.add(Manifest.permission.RECORD_AUDIO);
         }
+        if(ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.READ_MEDIA_IMAGES)!= PackageManager.PERMISSION_GRANTED){
+            permissionList.add(Manifest.permission.READ_MEDIA_IMAGES);
+        }
         if(!permissionList.isEmpty()){
             String [] permissions = permissionList.toArray(new String[permissionList.size()]);
             ActivityCompat.requestPermissions(MapActivity.this,permissions,REQUEST_PERMISSION_RESULT);
@@ -326,6 +339,7 @@ public class MapActivity extends AppCompatActivity{
      */
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        Log.d("Permission", "onRequestPermissionsResult called");
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode){
             case REQUEST_PERMISSION_RESULT:

@@ -1,7 +1,5 @@
 <resources>
-
     <string name="app_name">lbstest</string>
-
     <string-array name="time_units">
         <item>分钟</item>
         <item>小时</item>
@@ -13,10 +11,8 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
-
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
-
 </resources>
 
 
