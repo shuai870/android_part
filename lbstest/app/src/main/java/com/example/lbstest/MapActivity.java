@@ -31,6 +31,8 @@ import com.baidu.location.BDAbstractLocationListener;
 import com.baidu.location.BDLocation;
 import com.baidu.location.LocationClient;
 import com.baidu.location.LocationClientOption;
+import com.baidu.mapapi.SDKInitializer;
+import com.baidu.mapapi.common.BaiduMapSDKException;
 import com.baidu.mapapi.map.BaiduMap;
 import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
@@ -53,8 +55,6 @@ import java.util.List;
 import java.util.Locale;
 
 import com.baidu.trace.LBSTraceClient;
-
-
 public class MapActivity extends AppCompatActivity{
     public MapView mMapView = null;
     private LocationClient mLocationClient = null;
@@ -65,23 +65,24 @@ public class MapActivity extends AppCompatActivity{
     private TextToSpeech tts;
     private boolean ttsReady = false;
     private boolean hasAlertedRecently = false;
+    List<LatLng> newC = new ArrayList<>();
+    private  TrackManager trackManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_map);
         LocationClient.setAgreePrivacy(true);
-        LBSTraceClient.setAgreePrivacy(getApplicationContext(),true);
+        try {
+            mLocationClient= new LocationClient(getApplicationContext());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         if(mLocationClient != null) {
             agreePermission();  //申请权限并进行定位  申请权限的代码里有定位方法requestLocation()
         }
-        setContentView(R.layout.activity_map);
         mMapView =(MapView) findViewById(R.id.mMapView);
         mBaiduMap = mMapView.getMap();
         mBaiduMap.setMyLocationEnabled(true);
-        try {
-            mLocationClient= new LocationClient(getApplicationContext());
-        } catch(Exception e) {
-        }
-
         dynamicJsonParser = new DynamicJsonParser(this,mBaiduMap);
         PhotoUploader photoUploader = new PhotoUploader(getApplicationContext());
         try {
@@ -97,9 +98,6 @@ public class MapActivity extends AppCompatActivity{
             });
         } catch(Exception e) {
         }
-
-
-
         /**
          * 光线传感器获取
          */
@@ -109,7 +107,6 @@ public class MapActivity extends AppCompatActivity{
             @Override
             public void onSensorChanged(SensorEvent event) {
                 float lux = event.values[0];
-                Log.d("LIGHT_SENSOR", "当前光强: " + lux);
                 if (lux < 5 && ttsReady && !hasAlertedRecently) {
                     speak("触发主动告警");
                     AudioAlertRecorder.start(getApplicationContext());  // 开始录音
@@ -123,8 +120,6 @@ public class MapActivity extends AppCompatActivity{
             public void onAccuracyChanged(Sensor sensor, int accuracy) {}
         };
         sensorManager.registerListener(lightListener, lightSensor, SensorManager.SENSOR_DELAY_NORMAL);
-
-
         /**
          * 同步地理围栏坐标
          */
@@ -135,8 +130,6 @@ public class MapActivity extends AppCompatActivity{
                 dynamicJsonParser.fetchAndParseJson();
             }
         });
-
-
         Button warning = findViewById(R.id.warning);
         warning.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -144,42 +137,53 @@ public class MapActivity extends AppCompatActivity{
                 drawSimplePolyline();
             }
         });
+        newC.add(new LatLng(34.159369,108.907082)); // 坐标点1
+        newC.add(new LatLng(34.159373,108.907338)); // 坐标点1
+        newC.add(new LatLng(34.159358,108.907468)); // 坐标
+        newC.add(new LatLng(34.159362,108.907665)); // 坐标
+        newC.add(new LatLng(34.159511,108.907661)); // 坐标
+        newC.add(new LatLng(34.160165,108.907701)); // 坐
+        newC.add(new LatLng(34.16056,108.907728)); // 坐标
+        newC.add(new LatLng(34.160631,108.907724)); // 坐标
+        newC.add(new LatLng(34.160837,108.907441)); // 坐标
+        newC.add(new LatLng(34.154388,108.90736));
+        newC.add(new LatLng(34.154389,108.90736));
+        newC.add(new LatLng(34.154385,108.90736));
+        newC.add(new LatLng(34.154387,108.90736));
+        newC.add(new LatLng(34.154388,108.90736));
+        newC.add(new LatLng(34.154387,108.90736));
+        newC.add(new LatLng(34.154385,108.90736));
+        newC.add(new LatLng(34.154374,108.90736));
+        newC.add(new LatLng(34.154388,108.90736));
+        newC.add(new LatLng(34.154374,108.90736));
+        newC.add(new LatLng(34.159434,108.905184));
 
+
+        trackManager = new TrackManager();
+        trackManager.setRoute(newC);  // 设置轨迹点集合
+        trackManager.setEllipseWidth(20.0);  // 设置容忍范围
+        trackManager.setDeviationListener(new TrackManager.DeviationListener() {
+            @Override
+            public void onOutOfTrack(LatLng point) {
+                Toast.makeText(getApplicationContext(), "偏离轨迹", Toast.LENGTH_SHORT).show();
+            }
+            @Override
+            public void onBackOnTrack(LatLng point) {
+                Toast.makeText(getApplicationContext(), "回到轨迹", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
     // 创建一个绘制折线的方法
     private void drawSimplePolyline() {
-        // 定义一组折线的坐标点
-        List<LatLng> points = new ArrayList<>();
-        points.add(new LatLng(34.159369,108.907082)); // 坐标点1
-        points.add(new LatLng(34.159373,108.907338)); // 坐标点1
-        points.add(new LatLng(34.159358,108.907468)); // 坐标
-        points.add(new LatLng(34.159362,108.907665)); // 坐标
-        points.add(new LatLng(34.159511,108.907661)); // 坐标
-        points.add(new LatLng(34.160165,108.907701)); // 坐
-        points.add(new LatLng(34.16056,108.907728)); // 坐标
-        points.add(new LatLng(34.160631,108.907724)); // 坐标
-        points.add(new LatLng(34.160837,108.907441)); // 坐标
-        points.add(new LatLng(34.154388,108.90736));
-        points.add(new LatLng(34.154389,108.90736));
-        points.add(new LatLng(34.154385,108.90736));
-        points.add(new LatLng(34.154387,108.90736));
-        points.add(new LatLng(34.154388,108.90736));
-        points.add(new LatLng(34.154387,108.90736));
-        points.add(new LatLng(34.154385,108.90736));
-        points.add(new LatLng(34.154374,108.90736));
-        points.add(new LatLng(34.154388,108.90736));
-        points.add(new LatLng(34.154374,108.90736));
-        points.add(new LatLng(34.154388,108.90736));
-
-        // 创建 PolylineOptions 对象来绘制折线
         PolylineOptions polylineOptions = new PolylineOptions()
-                .points(points)  // 设置折线的坐标点
+                .points(newC)  // 设置折线的坐标点
                 .width(10)       // 设置折线宽度
                 .color(0x55FF0000); // 设置折线颜色（绿色）
         mBaiduMap.addOverlay(polylineOptions);
-        for (LatLng point : points) {
+        for (LatLng point : newC) {
             addSpecialMarker(point); // 为特殊点添加标记
         }
+        Log.d("sahdoahsodashodashoi",newC.toString());
     }
     private void addSpecialMarker(LatLng point) {
         // 创建标记并添加到地图上
@@ -232,6 +236,9 @@ public class MapActivity extends AppCompatActivity{
                     .direction(bdLocation.getDirection())
                     .latitude(bdLocation.getLatitude()).longitude(bdLocation.getLongitude()).build();
             mBaiduMap.setMyLocationData(locData);
+            newC.add(new LatLng(locData.latitude,locData.longitude));  //加入newC
+            trackManager.checkCurrentPosition(new LatLng(locData.latitude,locData.longitude));//偏离触发告警
+            RotatedEllipseUtil.getEllipseOverlay(newC.get(20),newC.get(19),20);//把最新的两个点作为参考画出来
         }
     }
     /**
@@ -317,8 +324,10 @@ public class MapActivity extends AppCompatActivity{
         if(ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.RECORD_AUDIO)!= PackageManager.PERMISSION_GRANTED){
             permissionList.add(Manifest.permission.RECORD_AUDIO);
         }
-        if(ContextCompat.checkSelfPermission(MapActivity.this, Manifest.permission.READ_MEDIA_IMAGES)!= PackageManager.PERMISSION_GRANTED){
-            permissionList.add(Manifest.permission.READ_MEDIA_IMAGES);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED) {
+                permissionList.add(Manifest.permission.READ_MEDIA_IMAGES);
+            }
         }
         if(!permissionList.isEmpty()){
             String [] permissions = permissionList.toArray(new String[permissionList.size()]);
@@ -347,11 +356,12 @@ public class MapActivity extends AppCompatActivity{
                     for(int result : grantResults){
                         if(result != PackageManager.PERMISSION_GRANTED){
                             Toast.makeText(this, "请同意权限使用本程序", Toast.LENGTH_SHORT).show();
-                            finish();
+//                            finish();
                             return;
                         }
                     }
                     requestLocation();
+                    Log.d("回调","回调");
                 }else{
                     Toast.makeText(this, "在申请权限回调时granResult.length错误", Toast.LENGTH_SHORT).show();
                     finish();

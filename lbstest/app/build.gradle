@@ -16,8 +16,34 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+
+    signingConfigs {
+        debug {
+            storeFile file("C:\\Users\\master\\.android\\debug.keystore")  // 替换为实际的 debug.keystore 路径
+            storePassword "android"                 // 替换为实际的 store 密码
+            keyAlias "androiddebugkey"                           // 替换为实际的 key alias
+            keyPassword "android"           // 替换为实际的 store 密码
+        }
+    }
+
+
+
+
+
     buildTypes {
+
+
+
+        debug {
+            signingConfig signingConfigs.debug
+        }
+
+
+
         release {
+            signingConfig signingConfigs.debug
+
+
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }

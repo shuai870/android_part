@@ -1,29 +1,23 @@
 package com.example.lbstest;
-
 import android.app.Application;
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.util.Log;
-
-import com.baidu.location.LocationClient;
 import com.baidu.mapapi.CoordType;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.common.BaiduMapSDKException;
-import com.baidu.trace.LBSTraceClient;
-
 public class DemoApplication extends Application {
 
     @Override
     public void onCreate() {
         super.onCreate();
-                SDKInitializer.setAgreePrivacy(this, true);
-
+        Log.d("DemoApplication", "onCreate: initializing Baidu SDK");
+        SDKInitializer.setAgreePrivacy(getApplicationContext(), true);
+        SDKInitializer.setCoordType(CoordType.BD09LL);
         try {
-             SDKInitializer.initialize(this);
+            SDKInitializer.initialize(getApplicationContext());
+            Log.d("DemoApplication", "SDKInitializer initialized");
         } catch (BaiduMapSDKException e) {
-
+            e.printStackTrace();
+            Log.e("DemoApplication", "SDK Initialization failed", e);
         }
-             SDKInitializer.setCoordType(CoordType.BD09LL);
-
     }
 }

@@ -40,6 +40,7 @@ import java.util.List;
 import android.os.Handler;
 import com.baidu.trace.LBSTraceClient;
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -155,11 +156,11 @@ public class BossActivity extends AppCompatActivity {
         ImageView imageView = dialogView.findViewById(R.id.image_view);
         Glide.with(this)
                 .load(PHOTO_URL)
+                .diskCacheStrategy(DiskCacheStrategy.NONE) // 不使用磁盘缓存
+                .skipMemoryCache(true)  // 跳过内存缓存
                 .into(imageView);
         // 设置坐标点信息
         coordinateInfo.setText("纬度：34.163308\n经度：108.908002");
-        // 设置图片（这里你可以使用自己需要的图片资源）
-        imageView.setImageResource(R.drawable.sample_image);  // 替换为你的图片资源
         audio_b.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

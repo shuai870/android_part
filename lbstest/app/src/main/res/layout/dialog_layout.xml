@@ -21,8 +21,8 @@
     <!-- 显示图片 -->
     <ImageView
         android:id="@+id/image_view"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="225px"
+        android:layout_height="400px"
         android:layout_marginTop="16dp"
         android:src="@drawable/sample_image" />
 
