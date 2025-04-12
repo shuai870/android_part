@@ -20,6 +20,7 @@ import com.baidu.mapapi.map.BitmapDescriptor;
 import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.CircleOptions;
 import com.baidu.mapapi.map.MapPoi;
+import com.baidu.mapapi.map.MapStatusUpdateFactory;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.MarkerOptions;
 import com.baidu.mapapi.map.OverlayOptions;
@@ -63,6 +64,8 @@ public class BossActivity extends AppCompatActivity {
     List<LatLng> Edata = new ArrayList<>();
     private MediaPlayer mediaPlayer;
     private static  String PHOTO_URL;
+
+    private boolean check;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,12 +81,6 @@ public class BossActivity extends AppCompatActivity {
         Button aqqqqq = findViewById(R.id.aqqqqq);
         PHOTO_URL = Constants.BASE_URL + "photo/latest";
 
-        aqqqqq.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                showOutOfBoundsAlert();
-            }
-        });
         BaiduMap.OnMapClickListener listener = new BaiduMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {
@@ -146,6 +143,47 @@ public class BossActivity extends AppCompatActivity {
         });
 
           drawSimplePolyline();
+
+        LatLng userLocation = new LatLng(34.159369,108.907082);
+        mBaiduMaps.setMapStatus(MapStatusUpdateFactory.zoomTo(16));
+        mBaiduMaps.setMapStatus(MapStatusUpdateFactory.newLatLng(userLocation));
+        //构建Marker图标
+        BitmapDescriptor bitmap = BitmapDescriptorFactory
+                .fromResource(R.drawable.one);
+        //构建MarkerOption，用于在地图上添加Marker
+        OverlayOptions option = new MarkerOptions()
+                .position(userLocation)
+                .icon(bitmap);
+        //在地图上添加Marker，并显示
+        mBaiduMaps.addOverlay(option);
+
+        aqqqqq.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(check == false) {
+                    showOutOfBoundsAlert();
+                    BitmapDescriptor bitmap = BitmapDescriptorFactory
+                            .fromResource(R.drawable.two);
+                    //构建MarkerOption，用于在地图上添加Marker
+                    OverlayOptions option = new MarkerOptions()
+                            .position(userLocation)
+                            .icon(bitmap);
+                    //在地图上添加Marker，并显示
+                    mBaiduMaps.addOverlay(option);
+                    check = true;
+                }else{
+                    BitmapDescriptor bitmap = BitmapDescriptorFactory
+                            .fromResource(R.drawable.one);
+                    //构建MarkerOption，用于在地图上添加Marker
+                    OverlayOptions option = new MarkerOptions()
+                            .position(userLocation)
+                            .icon(bitmap);
+                    //在地图上添加Marker，并显示
+                    mBaiduMaps.addOverlay(option);
+                    check = false;
+                }
+            }
+        });
     }
     private void showCoordinateDialog() {
         // 创建一个自定义布局的 AlertDialog
@@ -263,6 +301,7 @@ public class BossActivity extends AppCompatActivity {
     private void showOutOfBoundsAlert() {
         Toast.makeText(this, "对方已越界，定位已开启", Toast.LENGTH_SHORT).show();
     }
+
     private void showCircleFence(LatLng center,int radius) {
         mBaiduMaps.clear();
         // 创建圆形区域

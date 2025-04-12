@@ -2,6 +2,8 @@ package com.example.lbstest;
 import com.baidu.mapapi.map.PolygonOptions;
 import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.utils.DistanceUtil;
+
 import android.graphics.Color;
 
 import java.util.ArrayList;
@@ -23,16 +25,23 @@ public class RotatedEllipseUtil {
         double cy = (f1.latitude + f2.latitude) / 2.0;
 
         // 焦距c = 两点距离/2
-        double dx = f2.longitude - f1.longitude;
-        double dy = f2.latitude - f1.latitude;
-        double c = Math.sqrt(dx * dx + dy * dy) / 2.0;
+
+        double c = DistanceUtil.getDistance(f1, f2) / 2.0;
 
         // 半长轴a = 焦距 + 额外宽度/2
         double a = c + width / 2.0;
         double b = Math.sqrt(a * a - c * c);
 
         // 旋转角度
+        double dx = f2.longitude - f1.longitude;
+        double dy = f2.latitude - f1.latitude;
         double theta = Math.atan2(dy, dx);
+
+
+        // 经纬度转换系数
+        double metersPerLat = 111000.0; // 每纬度约 111km
+        double metersPerLng = 111000.0 * Math.cos(Math.toRadians(cy)); // 每经度约为纬度的 cos 倍
+
 
         for (int i = 0; i < numPoints; i++) {
             double t = 2 * Math.PI * i / numPoints;
@@ -43,10 +52,10 @@ public class RotatedEllipseUtil {
             double xRot = x * Math.cos(theta) - y * Math.sin(theta);
             double yRot = x * Math.sin(theta) + y * Math.cos(theta);
 
-            // 平移
-            double lat = cy + yRot;
-            double lng = cx + xRot;
-            points.add(new LatLng(lat, lng));
+            // 转换成经纬度偏移
+            double latOffset = yRot / metersPerLat;
+            double lngOffset = xRot / metersPerLng;
+            points.add(new LatLng(cy + latOffset, cx + lngOffset));
         }
 
         return points;

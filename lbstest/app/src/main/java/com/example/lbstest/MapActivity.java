@@ -44,6 +44,7 @@ import com.baidu.mapapi.map.MarkerOptions;
 
 import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
+import com.baidu.mapapi.map.PolygonOptions;
 import com.baidu.mapapi.map.PolylineOptions;
 
 import com.baidu.mapapi.model.LatLng;
@@ -67,6 +68,8 @@ public class MapActivity extends AppCompatActivity{
     private boolean hasAlertedRecently = false;
     List<LatLng> newC = new ArrayList<>();
     private  TrackManager trackManager;
+    private  Boolean trackOpen  = false;
+    private PolygonOptions draw;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -158,10 +161,8 @@ public class MapActivity extends AppCompatActivity{
         newC.add(new LatLng(34.154374,108.90736));
         newC.add(new LatLng(34.159434,108.905184));
 
-
         trackManager = new TrackManager();
-        trackManager.setRoute(newC);  // 设置轨迹点集合
-        trackManager.setEllipseWidth(20.0);  // 设置容忍范围
+
         trackManager.setDeviationListener(new TrackManager.DeviationListener() {
             @Override
             public void onOutOfTrack(LatLng point) {
@@ -183,7 +184,10 @@ public class MapActivity extends AppCompatActivity{
         for (LatLng point : newC) {
             addSpecialMarker(point); // 为特殊点添加标记
         }
-        Log.d("sahdoahsodashodashoi",newC.toString());
+        trackOpen  = true;
+        mBaiduMap.addOverlay(draw);//把最新的两个点作为参考画出来
+        trackManager.setRoute(newC);  // 设置轨迹点集合
+        trackManager.setEllipseWidth(20.0);  // 设置容忍范围
     }
     private void addSpecialMarker(LatLng point) {
         // 创建标记并添加到地图上
@@ -237,8 +241,11 @@ public class MapActivity extends AppCompatActivity{
                     .latitude(bdLocation.getLatitude()).longitude(bdLocation.getLongitude()).build();
             mBaiduMap.setMyLocationData(locData);
             newC.add(new LatLng(locData.latitude,locData.longitude));  //加入newC
-            trackManager.checkCurrentPosition(new LatLng(locData.latitude,locData.longitude));//偏离触发告警
-            RotatedEllipseUtil.getEllipseOverlay(newC.get(20),newC.get(19),20);//把最新的两个点作为参考画出来
+
+            trackManager.checkCurrentPosition(new LatLng(locData.latitude, locData.longitude));//偏离触发告警
+            draw = RotatedEllipseUtil.getEllipseOverlay(newC.get(20), newC.get(19), 20);
+
+
         }
     }
     /**
